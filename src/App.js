@@ -1,25 +1,57 @@
-import logo from './logo.svg';
 import './App.css';
+import 'survey-core/defaultV2.min.css';
+import { Model } from 'survey-core';
+import { Survey } from 'survey-react-ui';
+import { useCallback } from 'react';
+
+const surveyJson = {
+  elements: [{
+    name: "FirstName",
+    title: "Enter your first name:",
+    type: "text"
+  }, {
+    name: "LastName",
+    title: "Enter your last name:",
+    type: "text"
+  }]
+};
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const survey = new Model(surveyJson);
+  const alertResults = useCallback((sender) => {
+    const results = JSON.stringify(sender.data);
+    alert(results);
+  }, []);
+  const surveyComplete = useCallback((sender) => {
+    saveSurveyResults(
+      "https://your-web-service.com/",
+      sender.data
+    )
+  }, []);
+
+  survey.onComplete.add(alertResults);
+
+  return <Survey model={survey} />;
+}
+
+function saveSurveyResults(url, json) {
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    body: JSON.stringify(json)
+  })
+  .then(response => {
+    if (response.ok) {
+      // Handle success
+    } else {
+      // Handle error
+    }
+  })
+  .catch(error => {
+    // Handle error
+  });
 }
 
 export default App;
